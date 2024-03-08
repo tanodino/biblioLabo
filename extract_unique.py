@@ -91,6 +91,6 @@ for k in hash_pairs:
     edges.append([el1,el2,hash_pairs[k]])
 
 G.add_weighted_edges_from(edges)
-net = Network()
+net = Network(height='1000px')
 net.from_nx(G)
 net.save_graph("prova_%d.html"%year_th)
