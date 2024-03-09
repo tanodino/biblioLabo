@@ -36,10 +36,12 @@ def checkIfAuthorExists(author_name):
         author_stats = next(search_query)
         author_record = scholarly.fill(author_stats)
         scholar_id = author_record['scholar_id']
+        print(scholar_id)
         author_name = author_record['name'].lower()
     except:
         scholar_id = 'None'
     return scholar_id, unidecode(author_name)
+
 
 
 #READ DATA FROM CSV FILE
@@ -49,11 +51,8 @@ nom = df.iloc[:, 1].to_numpy()
 query1 = [ "\"%s %s\""%(unidecode(p).lower().strip(),unidecode(n).lower().strip()) for p,n in zip(prenom,nom)]
 query2 = [ "\"%s %s\""%(unidecode(n).lower().strip(),unidecode(p).lower().strip()) for p,n in zip(prenom,nom)]
 
-#query = zip(query1, query2)
-#print(query1)
-#exit()
-query1 = ['"valentine lebourgeois"','"raffaele gaetano"']
-query2 = ['"lebourgeois valentine"','"gaetano raffaele"']
+query1 = ['"agnes begue"']
+query2 = ['"begue agnes"']#['"lebourgeois valentine"','"gaetano raffaele"']
 
 #query = zip(['"valentine lebourgeois"'], ['"lebourgeois valentine"'])
 query = zip(query1, query2)
@@ -85,3 +84,22 @@ for q1, q2 in query:
         print("%s ; %s"%(q1, "None"))
     time.sleep(10)
     sys.stdout.flush()
+
+'''
+##### FOR AGNES BEGUE #########
+    
+prefix_path = "agnes_begue"
+if not os.path.exists(prefix_path):
+    os.makedirs(prefix_path)
+author = scholarly.search_author_id('ecx11oYAAAAJ')
+author = scholarly.fill(author )
+print(len(author['publications']))
+i=0
+for el in author['publications']:
+    print("pub %d"%i)
+    publication_filled = scholarly.fill(el)
+    save_file = open("%s/pub_%d.json"%(prefix_path,i), "w")  
+    json.dump(publication_filled, save_file, indent = 4)  
+    save_file.close()  
+    i+=1
+'''

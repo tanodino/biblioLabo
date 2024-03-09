@@ -7,6 +7,7 @@ import numpy as np
 import itertools
 from pyvis.network import Network
 import networkx as nx
+import math
 
 def extractAllPairs(authors, ref_names):
     authors_list = authors.split(" and ")
@@ -17,12 +18,26 @@ def extractAllPairs(authors, ref_names):
     return pairs
 
 def extractConnections(folderName, filePermanents):
+    hash_name2insti = {}
+    hash_name2team = {}
     df = pd.read_csv(filePermanents)
     prenom = df.iloc[:, 2].to_numpy()
     nom = df.iloc[:, 1].to_numpy()
     prenom = [ unidecode(el).lower().strip() for el in prenom]
     nom = [ unidecode(el).lower().strip() for el in nom]
     nom = [el.split(" ")[-1] for el in nom]
+    institutes = df.iloc[:,-1].to_numpy()
+    institutes = [el.strip() for el in institutes]
+
+    teams = df.iloc[:,-2].to_numpy()
+    teams = [el.strip() for el in teams]
+
+    for i in range(len(nom)):
+        hash_name2insti[nom[i]] = institutes[i]
+    
+    for i in range(len(nom)):
+        hash_name2team[nom[i]] = teams[i]
+
     ref_names = [ "%s %s"%(unidecode(p).lower().strip(),unidecode(n).lower().strip()) for p,n in zip(prenom,nom)]
     fNames = glob.glob(folderName+"/*.json")
     hash_pairs = {}
@@ -39,9 +54,9 @@ def extractConnections(folderName, filePermanents):
                 hash_pairs[key_pair] = 0
             hash_pairs[key_pair] = hash_pairs[key_pair] + 1
         f.close()
-    return hash_pairs
+    return hash_pairs, hash_name2insti, hash_name2team
 
-
+hash_color = {0:'#FF0000', 1: '#00FF00', 2: '#0000FF', 3: '#FFFF00', 4: '#FF00FF', 5: '#00FFFF', 6 : '#800080', 7: '#008000'}
 
 year_th = 2015
 folderName = "full_list"
@@ -80,7 +95,7 @@ for k in hashPub.keys():
 
 G = nx.Graph()
 filePermanents = 'permanents_TETIS.csv'
-hash_pairs = extractConnections(folderName, filePermanents)
+hash_pairs, hash_name2insti, hash_name2team = extractConnections(folderName, filePermanents)
 hash_pairs = {k: v for k, v in sorted(hash_pairs.items(), key=lambda item: -item[1])}
 edges = []
 for k in hash_pairs:
@@ -88,9 +103,35 @@ for k in hash_pairs:
     el1, el2 = k.split("_")
     el1 = el1.split(" ")[-1]
     el2 = el2.split(" ")[-1]
-    edges.append([el1,el2,hash_pairs[k]])
+    if hash_pairs[k] > 1:
+        #edges.append([el1,el2,hash_pairs[k]])
+        edges.append([el1,el2,hash_pairs[k]/5])
+        #edges.append([el1,el2,math.sqrt(hash_pairs[k])])
+        #edges.append([el1,el2,math.log2( hash_pairs[k]) ] )
+
+
+hash_insti2colors = {}
+for v in hash_name2insti.values():
+    if v not in hash_insti2colors:
+        hash_insti2colors[v] = hash_color[len(hash_insti2colors)]
+
+hash_team2colors = {}
+for v in hash_name2team.values():
+    if v not in hash_team2colors:
+        hash_team2colors[v] = hash_color[len(hash_team2colors)]
+
 
 G.add_weighted_edges_from(edges)
 net = Network(height='1000px')
 net.from_nx(G)
+for node in net.nodes:
+    print(node)
+    print(hash_name2insti[node['id']])
+    print( hash_insti2colors[ hash_name2insti[node['id']] ] )
+    node['color'] = hash_team2colors[ hash_name2team[node['id']] ]
+    #node['color'] = hash_insti2colors[ hash_name2insti[node['id']] ]
+    print(node)
+    print("======")
+
+
 net.save_graph("prova_%d.html"%year_th)
