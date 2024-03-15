@@ -8,6 +8,7 @@ import itertools
 from pyvis.network import Network
 import networkx as nx
 import math
+import numpy as np
 
 def extractAllPairs(authors, ref_names):
     authors_list = authors.split(" and ")
@@ -57,8 +58,9 @@ def extractConnections(folderName, filePermanents):
     return hash_pairs, hash_name2insti, hash_name2team
 
 hash_color = {0:'#FF0000', 1: '#00FF00', 2: '#0000FF', 3: '#FFFF00', 4: '#FF00FF', 5: '#00FFFF', 6 : '#800080', 7: '#008000'}
+hash_shape = {0:'start', 1:'square', 2:'dot', 3:'triangle', 4:'diamond',5:'triangleDown',6:'icon',7:'image'}
 
-year_th = 2015
+year_th = 2016
 folderName = "full_list"
 if not os.path.exists(folderName):
         os.makedirs(folderName)
@@ -103,11 +105,13 @@ for k in hash_pairs:
     el1, el2 = k.split("_")
     el1 = el1.split(" ")[-1]
     el2 = el2.split(" ")[-1]
-    if hash_pairs[k] > 1:
+    #if hash_pairs[k] > 1:
+    if hash_pairs[k] >= 2:
         #edges.append([el1,el2,hash_pairs[k]])
         edges.append([el1,el2,hash_pairs[k]/5])
         #edges.append([el1,el2,math.sqrt(hash_pairs[k])])
         #edges.append([el1,el2,math.log2( hash_pairs[k]) ] )
+
 
 
 hash_insti2colors = {}
@@ -120,6 +124,15 @@ for v in hash_name2team.values():
     if v not in hash_team2colors:
         hash_team2colors[v] = hash_color[len(hash_team2colors)]
 
+hash_team2shape = {}
+for v in hash_name2team.values():
+    if v not in hash_team2shape:
+        hash_team2shape[v] = hash_shape[len(hash_team2shape)]
+
+hash_insti2shape = {}
+for v in hash_name2insti.values():
+    if v not in hash_insti2shape:
+        hash_insti2shape[v] = hash_shape[len(hash_insti2shape)]
 
 G.add_weighted_edges_from(edges)
 net = Network(height='1000px')
@@ -128,8 +141,12 @@ for node in net.nodes:
     print(node)
     print(hash_name2insti[node['id']])
     print( hash_insti2colors[ hash_name2insti[node['id']] ] )
-    node['color'] = hash_team2colors[ hash_name2team[node['id']] ]
-    #node['color'] = hash_insti2colors[ hash_name2insti[node['id']] ]
+    #node['color'] = hash_team2colors[ hash_name2team[node['id']] ]
+    #node['shape'] = hash_insti2shape[ hash_name2insti[node['id']] ]
+
+    node['color'] = hash_insti2colors[ hash_name2insti[node['id']] ]
+    #node['shape'] = hash_team2shape[ hash_name2team[node['id']] ]
+    
     print(node)
     print("======")
 
