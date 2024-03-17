@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
+
 def getTeamsFromAuthors(authors_list, hash_rn2team):
     results = []
     for el in authors_list:
