@@ -51,10 +51,12 @@ nom = df.iloc[:, 1].to_numpy()
 query1 = [ "\"%s %s\""%(unidecode(p).lower().strip(),unidecode(n).lower().strip()) for p,n in zip(prenom,nom)]
 query2 = [ "\"%s %s\""%(unidecode(n).lower().strip(),unidecode(p).lower().strip()) for p,n in zip(prenom,nom)]
 
-query1 = ['"agnes begue"']
-query2 = ['"begue agnes"']#['"lebourgeois valentine"','"gaetano raffaele"']
+#query1 = ['"agnes begue"']
+#query2 = ['"begue agnes"']#['"lebourgeois valentine"','"gaetano raffaele"']
 
 #query = zip(['"valentine lebourgeois"'], ['"lebourgeois valentine"'])
+'''
+'''
 query = zip(query1, query2)
 for q1, q2 in query:
     scholar_id_1, author_name_1 = checkIfAuthorExists(q1)
@@ -85,6 +87,7 @@ for q1, q2 in query:
     time.sleep(10)
     sys.stdout.flush()
 
+
 '''
 ##### FOR AGNES BEGUE #########
     
@@ -103,3 +106,23 @@ for el in author['publications']:
     save_file.close()  
     i+=1
 '''
+'''
+
+##### FOR Lucile Sautot #########
+    
+prefix_path = "lucile_sautot"
+if not os.path.exists(prefix_path):
+    os.makedirs(prefix_path)
+author = scholarly.search_author_id('NAGlML4AAAAJ')
+author = scholarly.fill(author )
+print(len(author['publications']))
+i=0
+for el in author['publications']:
+    print("pub %d"%i)
+    publication_filled = scholarly.fill(el)
+    save_file = open("%s/pub_%d.json"%(prefix_path,i), "w")  
+    json.dump(publication_filled, save_file, indent = 4)  
+    save_file.close()  
+    i+=1
+'''
+
